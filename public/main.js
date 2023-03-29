@@ -28,15 +28,16 @@
         username: uname,
         text: message,
       });
+
       socket.emit("chat", {
         username: uname,
         text: message,
       });
 
-      socket.on("bot-message", {
-        botName: "Alec",
-        text: message,
-      });
+      //   socket.on("bot-message", {
+      //     botName: "Alec",
+      //     text: message,
+      //   });
 
       // socket.on('bot-message', (message) => {
       //     Message('Alec',
@@ -52,12 +53,12 @@
     socket.emit("exituser", uname);
     window.location.href = window.location.href;
   });
-  socket.on("bot", function (message) {
-    renderMessage("bot-message", message);
+  socket.on("bot-message", function (message) {
+    renderMessage("bot", message);
   });
 
   socket.on("chat", function (message) {
-    renderMessage("bot-message", message);
+    console.log("bot response here!");
   });
   function renderMessage(type, message) {
     let messageContainer = home.querySelector(".chat-screen .messages");
@@ -73,11 +74,11 @@
       messageContainer.appendChild(el);
     } else if (type == "bot") {
       let el = document.createElement("div");
-      el.setAttribute("class", "bot-message");
+      el.setAttribute("class", "message bot-message");
       el.innerHTML = `
             <div>
-               <div class="name">bot</div>
-               <div class='text'>${message.text}</div>
+               <div class="name">Bot</div>
+               <div class='text'>${message}</div>
             </div>
             `;
       messageContainer.appendChild(el);

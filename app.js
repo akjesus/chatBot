@@ -27,22 +27,24 @@ io.use((socket, next) =>
 //let's define the menulist
 const menuList = {
   2: "Lamb Chops",
-  3: "prime ribs",
+  3: "Prime Ribs",
   4: "Grilled Fish",
   5: "Escudo Rojo",
   6: "Carlo Rossi",
 };
+
+const menuHTML = `<br> 2: Lamb Chops <br>
+3: Prime ribs <br>
+4: Grilled Fish <br>
+5: Escudo Rojo <br>
+6: Carlo Rossi <br> `;
 
 //to create how to store the history
 let orderHistory = [];
 
 io.on("connection", function (socket) {
   console.log("User with ID: " + socket.id + ", connected!");
-  const botMessage = (message) => {
-    socket.emit("bot-message", message);
-  };
 
-  botMessage("Hello! What is your name?");
   let username = "";
 
   //listen for message from client side
@@ -62,14 +64,14 @@ io.on("connection", function (socket) {
   let userName = "";
 
   // Listen for incoming user messages
-  socket.on("user-message", (message) => {
+  socket.on("chat", (message) => {
     console.log("User message received:", message);
 
     if (!userName) {
       // Save the user's name and update the welcome message
-      userName = message;
+      userName = message.username;
       sendBotMessage(
-        `Welcome to the Grilz 'n' Barz, ${userName}!
+        `Welcome to the Grilz 'n' Barz, <b>${userName}! </b> <br> <br>
           Select 1 to place order <br>
           Select 99 to checkout order. <br>
           Select 98 to see order History. <br>
@@ -77,22 +79,23 @@ io.on("connection", function (socket) {
           Select 0 to Cancel order`
       );
     } else {
-      switch (message) {
+      switch (message.text) {
         case "1":
           // Generate the list of items dynamically
           const itemOptions = Object.keys(menuList)
             .map((key) => `${key}. ${menuList[key]}`)
             .join("\n");
           sendBotMessage(
-            `Here is a list of items you can order: ${itemOptions} Please select one by typing its number.`
+            `Here is a list of items you can order: ${menuHTML} Please select one by typing its number.`
           );
           break;
         case "2":
         case "3":
         case "4":
         case "5":
+        case "6":
           // Parse the number from the user input and add the corresponding item to the current order
-          const selectedIndex = parseInt(message);
+          const selectedIndex = parseInt(message.text);
           if (menuList.hasOwnProperty(selectedIndex)) {
             const selectedItem = menuList[selectedIndex];
             socket.request.session.currentOrder.push(selectedItem);
@@ -155,9 +158,10 @@ io.on("connection", function (socket) {
     socket.emit("update", username + " left the conversation");
   });
 
-  socket.on("chat", function (message) {
-    socket.emit("chat", message);
-  });
+  //   socket.on("chat", function (message) {
+  //     console.log("user started chatting!");
+  //     socket.emit("chat", message);
+  //   });
 });
 
 server.listen(5000, () => {
